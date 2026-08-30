@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AmbuRoute | Intelligent Emergency Navigation & Response Platform</title>
+    <meta name="description" content="Connected emergency ambulance navigation, railway crossing intelligence, AI hospital recommendation, and green corridor coordination.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="brand-wrapper">
+            <div class="brand" onclick="switchView('landing')">
+                <span class="brand-icon">🚑</span>
+                <div class="brand-text">Ambu<span>Route</span></div>
+            </div>
+            
+            <!-- PROMINENT BACK ARROW BUTTON BESIDE AMBUROUTE BRAND LOGO -->
+            <button class="nav-back-btn" id="nav-back-btn" onclick="handleNavBackBtn()" style="display: none;">
+                ⬅️ Back
+            </button>
+        </div>
+
+        <!-- DESKTOP NAVBAR LINKS (VISIBLE ON LAPTOP / PC) -->
+        <ul class="nav-links">
+            <li><a class="nav-link active" id="nav-landing" onclick="switchView('landing')">Home</a></li>
+            <li><a class="nav-link" id="nav-dashboard" onclick="switchView('dashboard')">Patient Dashboard</a></li>
+            <li><a class="nav-link" id="nav-hospitals" onclick="switchView('hospitals')">Hospitals & Beds</a></li>
+            <li><a class="nav-link" id="nav-driver" onclick="switchView('driver')">Driver View</a></li>
+            <li id="admin-nav-item" style="display: none;"><a class="nav-link" id="nav-admin" onclick="switchView('admin')">⚙️ Admin Command Center</a></li>
+        </ul>
+
+        <!-- DESKTOP AUTH ACTIONS (VISIBLE ON LAPTOP / PC) -->
+        <div class="desktop-auth-actions">
+            <span class="role-badge" id="current-role-badge">Role: GUEST</span>
+            <button class="btn btn-outline" onclick="handleAuthBtnClick()" id="auth-btn">Sign In / Register</button>
+        </div>
+
+        <!-- MOBILE 3-LINE MENU BUTTON (VISIBLE ONLY ON SMARTPHONES) -->
+        <button class="menu-toggle-3lines-btn" onclick="toggleMobileMenu()" aria-label="Open App Menu">
+            <span class="hamburger-icon">☰</span> Menu
+        </button>
+    </header>
+
+    <!-- SLIDE-OUT MENU DRAWER (CONTAINING HOME, DASHBOARD, HOSPITALS, DRIVER, ADMIN & AUTH FOR SMARTPHONES) -->
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+    <div class="mobile-menu-drawer" id="mobile-menu-drawer">
+        <div class="mobile-drawer-header">
+            <div class="brand">
+                <span class="brand-icon">🚑</span>
+                <div class="brand-text">Ambu<span>Route</span></div>
+            </div>
+            <span class="drawer-close-btn" onclick="closeMobileMenu()">✕</span>
+        </div>
+
+        <div class="mobile-drawer-body">
+            <button class="drawer-nav-item active" id="drawer-nav-landing" onclick="switchView('landing'); closeMobileMenu();">
+                <span>🏠</span> Home
+            </button>
+            <button class="drawer-nav-item" id="drawer-nav-dashboard" onclick="switchView('dashboard'); closeMobileMenu();">
+                <span>🚨</span> Patient Dashboard
+            </button>
+            <button class="drawer-nav-item" id="drawer-nav-hospitals" onclick="switchView('hospitals'); closeMobileMenu();">
+                <span>🏥</span> Hospitals & ICU Beds
+            </button>
+            <button class="drawer-nav-item" id="drawer-nav-driver" onclick="switchView('driver'); closeMobileMenu();">
+                <span>📍</span> Driver View (GPS Navigation)
+            </button>
+            <button class="drawer-nav-item" id="drawer-nav-admin" style="display: none;" onclick="switchView('admin'); closeMobileMenu();">
+                <span>⚙️</span> Admin Command Center
+            </button>
+
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-glass);">
+                <div style="margin-bottom: 1rem;">
+                    <span class="role-badge" id="drawer-role-badge">Role: GUEST</span>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="handleAuthBtnClick(); closeMobileMenu();" id="drawer-auth-btn">
+                    Sign In / Register
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING DEMO LAUNCHER BUTTON -->
+    <button class="demo-floating-btn" onclick="startAutomatedDemo()">
+        <span>⚡</span> LOAD DEMO EMERGENCY
+    </button>
+
+    <!-- MAIN CONTAINER -->
+    <main class="view-container">
+
+        <!-- 1. LANDING PAGE VIEW -->
+        <section id="view-landing" class="view-section active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Every Second <span>Matters.</span></h1>
+                    <p class="hero-subtitle" style="font-size: 1.2rem; font-weight: 500; color: #e2e8f0; line-height: 1.6; margin-bottom: 1.25rem;">
+                        <span style="color: var(--warning-amber); font-weight: 700; display: block; margin-bottom: 0.35rem; font-size: 1.15rem;">❤️ Dedicated to My Mother</span>
+                        Inspired by a real-life emergency to ensure no ambulance ever suffers avoidable railway crossing delays, connecting patients, smart route optimization, and hospitals in one platform.
+                    </p>
+                    
+                    <!-- DESIGNED BY SUDHANSHU & EXACT SOCIAL LINKS (DIRECTLY ABOVE EMERGENCY BUTTON) -->
+                    <div style="margin-bottom: 1.75rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem;">
+                            ✨ Designed & Developed by <strong style="color: #f8fafc; font-weight: 700;">Sudhanshu</strong>
+                        </span>
+                        <div style="display: flex; gap: 0.65rem; align-items: center;">
+                            <!-- Instagram -->
+                            <a href="https://www.instagram.com/mesudhanshusingh?igsh=emliZ3JkZTE5cDY5" target="_blank" rel="noopener noreferrer" 
+                               title="Sudhanshu on Instagram"
+                               style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; text-decoration: none; box-shadow: 0 4px 12px rgba(220, 39, 67, 0.4); transition: transform 0.2s;"
+                               onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                    </a>
+
+                    <!-- LinkedIn -->
+                    <a href="https://www.linkedin.com/in/sudhanshu-singh-777525276/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B5pkkz7UFSmWx4EUt7a0ShQ%3D%3D" target="_blank" rel="noopener noreferrer" 
+                       title="Sudhanshu on LinkedIn"
+                       style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #0077b5; color: white; text-decoration: none; box-shadow: 0 4px 12px rgba(0, 119, 181, 0.4); transition: transform 0.2s;"
+                       onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+                    <div class="hero-actions">
+                        <button class="btn btn-emergency" onclick="openEmergencyModal()">🚨 Activate Emergency</button>
+                        <button class="btn btn-outline" onclick="switchView('hospitals')">🏥 Find Best Hospital</button>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="ambulance-card-visual">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span class="badge badge-critical">🚨 LIVE EMERGENCY</span>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">ETA: 7 mins</span>
+                        </div>
+                        <h4 style="font-weight: 700; margin-bottom: 0.25rem;">Ambulance KA-01-EQ-1001</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Patient: Severe Cardiac Distress</p>
+                        <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent-green); padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; color: var(--accent-green);">
+                            ✅ Alternate Route Selected (Avoided Gate LC-42 Closure)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div style="margin-top: 4rem;">
+                <h2 style="font-family: var(--font-heading); text-align: center; font-size: 2.2rem; margin-bottom: 2rem;">How AmbuRoute Saves Lives</h2>
+                <div class="dashboard-grid">
+                    <div class="dash-card glass-panel">
+                        <div class="dash-card-icon">🚆</div>
+                        <h3 class="dash-card-title">Railway Crossing Intelligence</h3>
+                        <p class="dash-card-desc">Predicts train arrival vs ambulance ETA to automatically reroute around closed railway gates.</p>
+                    </div>
+                    <div class="dash-card glass-panel">
+                        <div class="dash-card-icon">🏥</div>
+                        <h3 class="dash-card-title">AI Hospital Recommendation</h3>
+                        <p class="dash-card-desc">Matches patient condition against real-time ICU beds, ventilators, and medical specialty match.</p>
+                    </div>
+                    <div class="dash-card glass-panel">
+                        <div class="dash-card-icon">🚨</div>
+                        <h3 class="dash-card-title">Green Corridor Clearing</h3>
+                        <p class="dash-card-desc">Synchronizes traffic hotspots and notifies nearby opted-in commuters to yield emergency lanes.</p>
+                    </div>
+                    <div class="dash-card glass-panel">
+                        <div class="dash-card-icon">📍</div>
+                        <h3 class="dash-card-title">Live Tracking & Pre-Arrival Alert</h3>
+                        <p class="dash-card-desc">Provides hospital trauma teams with continuous telemetry and patient condition updates.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. MAIN PATIENT DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="font-family: var(--font-heading);">Patient Emergency Dashboard</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">📍 Current Location: Central District (12.9716, 77.5946)</p>
+                </div>
+                <div class="badge badge-success">🟢 System Operational</div>
+            </div>
+
+            <!-- Main Actions -->
+            <div class="dashboard-grid">
+                <div class="dash-card glass-panel" style="border: 1px solid var(--primary-red);" onclick="openEmergencyModal()">
+                    <div class="dash-card-icon" style="color: var(--primary-red);">🚨</div>
+                    <h3 class="dash-card-title" style="color: var(--primary-red);">ACTIVATE EMERGENCY</h3>
+                    <p class="dash-card-desc">Instant 1-click dispatch, hospital matching, & green corridor activation.</p>
+                </div>
+                <div class="dash-card glass-panel" onclick="switchView('hospitals')">
+                    <div class="dash-card-icon">🏥</div>
+                    <h3 class="dash-card-title">FIND BEST HOSPITAL</h3>
+                    <p class="dash-card-desc">AI symptom analyzer & live bed availability finder.</p>
+                </div>
+                <div class="dash-card glass-panel" onclick="switchView('driver')">
+                    <div class="dash-card-icon">📍</div>
+                    <h3 class="dash-card-title">LIVE AMBULANCE TRACKING</h3>
+                    <p class="dash-card-desc">Track real-time GPS coordinates & driver HUD telemetry.</p>
+                </div>
+                <div class="dash-card glass-panel" onclick="toggleChat()">
+                    <div class="dash-card-icon">🤖</div>
+                    <h3 class="dash-card-title">EMERGENCY ASSISTANT</h3>
+                    <p class="dash-card-desc">Instant first-aid triage guidance & symptom check.</p>
+                </div>
+            </div>
+
+            <!-- RAILWAY INTELLIGENCE ALERT BANNER -->
+            <div class="railway-banner" id="railway-alert-box">
+                <div class="railway-alert-content">
+                    <span style="font-size: 2.2rem;">🚆</span>
+                    <div>
+                        <h4 style="font-size: 1.1rem; color: var(--warning-amber);">Railway Crossing Alert: Gate LC-42 (MG Road)</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-primary);" id="railway-alert-text">
+                            Ambulance ETA: 5 min | Train EXP-12677 Arrival: 4 min — <strong>⚠️ HIGH RISK (Gate Closure Imminent)</strong>
+                        </p>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="selectAlternateRoute()">✅ USE ALTERNATE ROUTE (+3 min)</button>
+            </div>
+
+            <!-- SMART ROUTE OPTIMIZATION COMPARISON -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-family: var(--font-heading); margin-bottom: 1rem;">Smart Route Optimization Engine</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                    <div class="glass-panel" style="padding: 1.25rem; border: 1px solid var(--primary-red);" id="route-card-a">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <strong>Route A (Fastest Direct)</strong>
+                            <span class="badge badge-critical">⚠️ HIGH RISK</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Distance: 4.2 km | ETA: 12 min</p>
+                        <p style="font-size: 0.85rem; color: var(--warning-amber); margin-top: 0.5rem;">🚆 Includes Railway Crossing LC-42 (Blocked by Train)</p>
+                    </div>
+                    <div class="glass-panel" style="padding: 1.25rem; border: 2px solid var(--accent-green);" id="route-card-b">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <strong>Route B (Safe Alternate)</strong>
+                            <span class="badge badge-success">⭐ RECOMMENDED</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Distance: 4.8 km | ETA: 14 min</p>
+                        <p style="font-size: 0.85rem; color: var(--accent-green); margin-top: 0.5rem;">✅ Avoids Railway Gates | 🚨 Green Corridor Active</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAP DISPLAY -->
+            <div class="map-container">
+                <div id="leaflet-map"></div>
+            </div>
+        </section>
+
+        <!-- 3. HOSPITALS & BED AVAILABILITY VIEW -->
+        <section id="view-hospitals" class="view-section">
+            <h2 style="font-family: var(--font-heading); margin-bottom: 1rem;">AI Hospital Recommendation & ICU Bed Inventory</h2>
+            
+            <div class="glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
+                <h4 style="margin-bottom: 0.75rem;">Describe Patient Condition for AI Matching</h4>
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" id="ai-symptom-input" class="form-input" placeholder="e.g. Severe chest pain, shortness of breath, left arm numbness" value="Severe chest pain and difficulty breathing">
+                    <button class="btn btn-primary" onclick="searchAiHospitals()">Run AI Match</button>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    ⚠️ AI recommendation is for dispatch & spatial routing support only. In medical emergencies, consult qualified medical professionals. Click on any hospital card below to view its live emergency room details & bed inventory.
+                </p>
+            </div>
+
+            <div id="hospitals-list-container" class="dashboard-grid">
+                <!-- Dynamically Populated -->
+            </div>
+        </section>
+
+        <!-- 4. LIVE DRIVER GPS TURN-BY-TURN NAVIGATION VIEW -->
+        <section id="view-driver" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h2 style="font-family: var(--font-heading);">Ambulance Driver Live GPS Navigation</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">🚑 Vehicle: KA-01-EQ-1001 | Driver: Rajesh Kumar | Destination: City Emergency Center</p>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-outline" onclick="recenterDriverMap()">📍 Recenter GPS</button>
+                    <button class="btn btn-success" id="driver-nav-toggle-btn" onclick="toggleDriverGpsNavigation()">▶ Start GPS Navigation</button>
+                </div>
+            </div>
+
+            <div class="map-container" style="height: 540px; position: relative;">
+                
+                <!-- TOP TURN-BY-TURN MANEUVER CARD -->
+                <div id="turn-by-turn-card" style="position: absolute; top: 15px; left: 15px; z-index: 1000; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(12px); border: 1px solid var(--accent-green); padding: 1rem 1.25rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.6); min-width: 340px;">
+                    <div id="turn-icon" style="font-size: 2.2rem; background: rgba(16, 185, 129, 0.2); padding: 0.5rem 0.85rem; border-radius: 10px; color: var(--accent-green);">⬆</div>
+                    <div>
+                        <div id="turn-distance" style="font-size: 0.75rem; font-weight: 700; color: var(--accent-green); text-transform: uppercase; letter-spacing: 0.5px;">In 400 meters</div>
+                        <div id="turn-instruction" style="font-size: 1.05rem; font-weight: 800; color: white;">Head North on MG Road Sector 4</div>
+                        <div id="turn-subtext" style="font-size: 0.8rem; color: var(--text-secondary);">Green Corridor Traffic Signals Active</div>
+                    </div>
+                </div>
+
+                <div id="driver-map"></div>
+
+                <!-- BOTTOM DRIVER NAVIGATION TELEMETRY HUD -->
+                <div class="driver-hud">
+                    <div>
+                        <span class="badge badge-critical" style="margin-bottom: 0.35rem;">🚨 GREEN CORRIDOR SYNCHRONIZED</span>
+                        <h3 id="driver-alert-title">Route B via South Flyover Bypass</h3>
+                        <p style="font-size: 0.85rem; color: var(--accent-green);" id="driver-alert-desc">✅ Safely bypassed closed Railway Gate LC-42</p>
+                    </div>
+                    <div style="display: flex; gap: 1.5rem; align-items: center;">
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Current Speed</div>
+                            <div style="font-size: 1.5rem; font-weight: 900; color: var(--accent-green);" id="driver-speed-disp">52 km/h</div>
+                        </div>
+                        <div style="text-align: right; border-left: 1px solid var(--border-glass); padding-left: 1.5rem;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Distance & ETA</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: white;" id="driver-eta-disp">3.4 km | 5 mins</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. ADMIN COMMAND CENTER VIEW (RESTRICTED TO SUDHANSHUADMIN) -->
+        <section id="view-admin" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="font-family: var(--font-heading); color: var(--warning-amber);">⚙️ System Command Center & Admin Analytics</h2>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">Logged in as System Admin: <strong>sudhanshuadmin@login</strong></p>
+                </div>
+                <span class="badge badge-warning">🛡️ ADMIN ACCESS GRANTED</span>
+            </div>
+            
+            <div class="dashboard-grid" style="margin-bottom: 2rem;">
+                <div class="dash-card glass-panel">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Active Emergencies</div>
+                    <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-red);" id="stat-active-em">3</div>
+                </div>
+                <div class="dash-card glass-panel">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Avg Response Time</div>
+                    <div style="font-size: 2.2rem; font-weight: 800; color: var(--accent-green);" id="stat-avg-time">7.4 min</div>
+                </div>
+                <div class="dash-card glass-panel">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Railway Risks Averted</div>
+                    <div style="font-size: 2.2rem; font-weight: 800; color: var(--warning-amber);" id="stat-rail-averted">14</div>
+                </div>
+                <div class="dash-card glass-panel">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Green Corridors Active</div>
+                    <div style="font-size: 2.2rem; font-weight: 800; color: var(--info-blue);" id="stat-green-corridors">2</div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="glass-panel" style="padding: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem;">Emergency Incident Trends</h4>
+                    <canvas id="chart-trends" height="200"></canvas>
+                </div>
+                <div class="glass-panel" style="padding: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem;">Metropolitan ICU Capacity Ratio</h4>
+                    <canvas id="chart-icu" height="200"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer style="margin-top: 4rem; padding: 2rem 1.5rem; border-top: 1px solid var(--border-glass); text-align: center; background: rgba(11, 15, 25, 0.95);">
+        <div style="max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+            <div class="brand">
+                <span class="brand-icon">🚑</span>
+                <div class="brand-text">Ambu<span>Route</span></div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                Built for faster emergency response, zero railway delays, and synchronized hospital coordination.
+            </p>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem;">
+                <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary);">
+                    Designed & Developed by <strong style="color: #f8fafc; font-weight: 700;">Sudhanshu</strong>
+                </span>
+                <div style="display: flex; gap: 0.65rem; align-items: center;">
+                    <!-- Instagram -->
+                    <a href="https://www.instagram.com/mesudhanshusingh?igsh=emliZ3JkZTE5cDY5" target="_blank" rel="noopener noreferrer" 
+                       title="Sudhanshu on Instagram"
+                       style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; text-decoration: none; transition: transform 0.2s;"
+                       onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                    </a>
+
+                    <!-- LinkedIn -->
+                    <a href="https://www.linkedin.com/in/sudhanshu-singh-777525276/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B5pkkz7UFSmWx4EUt7a0ShQ%3D%3D" target="_blank" rel="noopener noreferrer" 
+                       title="Sudhanshu on LinkedIn"
+                       style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #0077b5; color: white; text-decoration: none; transition: transform 0.2s;"
+                       onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- FLOATING EMERGENCY CHATBOT -->
+    <div class="chat-widget">
+        <div class="chat-toggle" onclick="toggleChat()">💬</div>
+        <div class="chat-modal" id="chat-modal">
+            <div class="chat-header">
+                <span>🤖 Emergency Assistant</span>
+                <span style="cursor: pointer;" onclick="toggleChat()">✕</span>
+            </div>
+            <div class="chat-body" id="chat-body">
+                <div class="msg-bubble msg-bot">
+                    Hello! Describe the patient's symptoms (e.g. chest pain, accident) for emergency guidance.
+                </div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" class="chat-input" id="chat-input-field" placeholder="Type symptoms..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                <button class="btn btn-primary" onclick="sendChatMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SIGN IN / REGISTER -->
+    <div class="modal-overlay" id="modal-auth">
+        <div class="modal-content" style="max-width: 440px;">
+            <span class="modal-close" onclick="closeAuthModal()">✕</span>
+            
+            <!-- Auth Tabs Header -->
+            <div style="display: flex; border-bottom: 1px solid var(--border-glass); margin-bottom: 1.5rem;">
+                <button class="nav-link active" id="tab-btn-login" style="flex: 1; text-align: center; border-radius: 0; padding: 0.75rem;" onclick="switchAuthTab('login')">Sign In</button>
+                <button class="nav-link" id="tab-btn-register" style="flex: 1; text-align: center; border-radius: 0; padding: 0.75rem;" onclick="switchAuthTab('register')">Register New Account</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form" onsubmit="handleLoginSubmit(event)">
+                <h3 style="font-family: var(--font-heading); margin-bottom: 1.25rem;">Sign In to AmbuRoute</h3>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="text" id="login-email" class="form-input" required value="sudhanshuadmin@login">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="login-password" class="form-input" required value="12345">
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeAuthModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Sign In ▶</button>
+                </div>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="register-form" style="display: none;" onsubmit="handleRegisterSubmit(event)">
+                <h3 style="font-family: var(--font-heading); margin-bottom: 1rem;">Create Patient Account</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                    Registered users can activate emergency dispatch and reserve ICU beds.
+                </p>
+
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="reg-name" class="form-input" required placeholder="e.g. Ramesh Kumar">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="reg-email" class="form-input" required placeholder="name@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="reg-password" class="form-input" required placeholder="Choose a password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" id="reg-phone" class="form-input" placeholder="+91 98765 43210">
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeAuthModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">Create Account ▶</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ACTIVATE EMERGENCY -->
+    <div class="modal-overlay" id="modal-emergency">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeEmergencyModal()">✕</span>
+            <h2 style="font-family: var(--font-heading); color: var(--primary-red); margin-bottom: 1rem;">🚨 ACTIVATE EMERGENCY</h2>
+            
+            <form id="emergency-form" onsubmit="handleEmergencySubmit(event)">
+                <div class="form-group">
+                    <label class="form-label">Patient Name</label>
+                    <input type="text" id="em-patient-name" class="form-input" required value="Anil Sharma">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Patient Age</label>
+                    <input type="number" id="em-patient-age" class="form-input" required value="54">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Emergency Type</label>
+                    <select id="em-type" class="form-select">
+                        <option value="CARDIAC">Cardiac Emergency / Severe Chest Pain</option>
+                        <option value="ACCIDENT_TRAUMA">Road Accident / Severe Trauma</option>
+                        <option value="RESPIRATORY">Respiratory Failure / Asthma</option>
+                        <option value="STROKE">Stroke / Sudden Paralysis</option>
+                        <option value="PREGNANCY">Maternity / Emergency Labor</option>
+                        <option value="OTHER">Other Medical Emergency</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Criticality Level</label>
+                    <select id="em-criticality" class="form-select">
+                        <option value="CRITICAL">🔴 CRITICAL (Immediate Life Threat)</option>
+                        <option value="HIGH">🟡 HIGH (Urgent Transport Needed)</option>
+                        <option value="MODERATE">🟢 MODERATE (Stable Condition)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Patient Condition Notes</label>
+                    <textarea id="em-condition" class="form-textarea" rows="2" placeholder="e.g. Patient conscious but experiencing severe chest tightness">Severe chest pain radiating to left arm, sweating</textarea>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeEmergencyModal()">Cancel</button>
+                    <button type="submit" class="btn btn-emergency">Dispatch & Start Route ▶</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: HOSPITAL DETAIL & EMERGENCY ROOM VIEW -->
+    <div class="modal-overlay" id="modal-hospital-detail">
+        <div class="modal-content" style="max-width: 720px;">
+            <span class="modal-close" onclick="closeHospitalDetailModal()">✕</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <div>
+                    <h2 style="font-family: var(--font-heading); font-size: 1.6rem;" id="hosp-detail-name">Hospital Name</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);" id="hosp-detail-address">Address & Phone</p>
+                </div>
+                <span class="badge badge-success" id="hosp-detail-status">🟢 ACTIVE ER</span>
+            </div>
+
+            <!-- Live Bed Inventory Grid -->
+            <h4 style="font-family: var(--font-heading); margin-bottom: 0.75rem; color: var(--text-primary);">🛏️ Live Bed Inventory</h4>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;" id="hosp-detail-beds">
+                <!-- Dynamically Populated -->
+            </div>
+
+            <!-- Incoming Emergency Patients Stream -->
+            <h4 style="font-family: var(--font-heading); margin-bottom: 0.75rem; color: var(--primary-red);">🚨 ER Incoming Patients & Pre-Arrival Stream</h4>
+            <div id="hosp-detail-incoming" style="margin-bottom: 1.5rem;">
+                <!-- Dynamically Populated -->
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-outline" onclick="closeHospitalDetailModal()">Close</button>
+                <button class="btn btn-success" id="hosp-detail-reserve-btn">Reserve Bed at This Hospital</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: BED RESERVATION -->
+    <div class="modal-overlay" id="modal-reserve-bed">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeBedModal()">✕</span>
+            <h2 style="font-family: var(--font-heading); margin-bottom: 1rem;">Reserve Hospital Bed</h2>
+            <form id="bed-form" onsubmit="handleBedSubmit(event)">
+                <input type="hidden" id="reserve-hospital-id">
+                <div class="form-group">
+                    <label class="form-label">Hospital</label>
+                    <input type="text" id="reserve-hospital-name" class="form-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Select Bed Type</label>
+                    <select id="reserve-bed-type" class="form-select">
+                        <option value="ICU">ICU Bed (Ventilator Ready)</option>
+                        <option value="EMERGENCY">Emergency Trauma Bed</option>
+                        <option value="SPECIALIST">Cardiac / Specialty Bed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Patient Name</label>
+                    <input type="text" id="reserve-patient-name" class="form-input" required value="Anil Sharma">
+                </div>
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeBedModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">Confirm Bed Reservation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leaflet JS & Chart.js -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom Frontend Application JS -->
+    <script src="js/app.js"></script>
+</body>
+</html>
